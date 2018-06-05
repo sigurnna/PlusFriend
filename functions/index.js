@@ -6,13 +6,10 @@ const session = require('express-session');
 const app = express();
 
 // First Appear Menu
-const firstMenu = "오늘의 조식 메뉴";
-const secondMenu = "오늘의 중식 메뉴";
-const thirdMenu = "오늘의 석식 메뉴";
+const wonjuCampus = "오늘의 중식 메뉴(원주)";
+const gangreungCampus = "오늘의 중식 메뉴(강릉)";
 
-// Second Appear Menu
-const areaWonju = "원주";
-const areaGangreung = "강릉";
+const ganreungMenu = ['제 1 학생식당 중식백반', '제 2 학생식당 일품요리', '문화관식당'];
 
 app.use(session({
     secret: 'sigurnna',
@@ -24,8 +21,8 @@ app.use(session({
 app.get('/keyboard', (req, res) => {
     res.append('Content-type', 'application/json; charset=utf-8');
     res.json({
-        "type": "buttons",
-        "buttons": [firstMenu, secondMenu, thirdMenu]
+        'type': 'buttons',
+        'buttons': [wonjuCampus, gangreungCampus]
     });
 });
 
@@ -34,33 +31,32 @@ app.post('/message', (req, res) => {
     req.accepts('application/json');
     req.acceptsCharsets('utf8');
 
-    const content = req.body['content'];
-
-    if (content == firstMenu || content == secondMenu || content == thirdMenu) {
-        processMenuSelection(req, res, content);
+    // TODO: gangreungMenu 메시지가 도착한 경우 processMenuSelection으로 라우트 되도록 하자.
+    if (content == wonjuCampus|| content == gangreungCampus) {
+        processCampusSelection(req, res);
     } else {
         res.status(400);
     }
 });
 
-// Internal
+// Menu Selection
 
-function processMenuSelection(req, res, menu) {
-    req.session.userKey = req.body['user_key'];
-    req.session.menu = menu;
+function processCampusSelection(req, res) {
+    const campus = req.body['content'];
 
-    res.append('Content-Type', 'application/json; charset=utf-8');
-    res.send({
-        'message': {
-            'text': '어떤 캠퍼스의 메뉴를 불러올까요?'
-        },
-        'keyboard': {
-            'type': 'buttons',
-            'buttons': [
-                areaWonju, areaGangreung
-            ]
-        }
-    });
+    if (campus == wonjuCampus) {
+        // TODO: 원주 크롤링 진행.
+    } else if (campus == gangreungCampus) {
+        // TODO: 강릉은 메뉴를 다시 선택해야 함. buttons를 리턴하자.
+    } else {
+        res.status(400);
+    }
 }
+
+function processMenuSelection(req, res) {
+
+}
+
+// Crwaling
 
 exports.staging = functions.https.onRequest(app);

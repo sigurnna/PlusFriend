@@ -23,7 +23,7 @@ app.use(session({
 // Kakao Plus Friend Initial Endpoint.
 app.get('/keyboard', (req, res) => {
     res.append('Content-type', 'application/json; charset=utf-8');
-    res.send({
+    res.json({
         "type": "buttons",
         "buttons": [firstMenu, secondMenu, thirdMenu]
     });

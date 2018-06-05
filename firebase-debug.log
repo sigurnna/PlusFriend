@@ -1,34 +1,34 @@
-[debug] [2018-06-05T07:41:56.110Z] ----------------------------------------------------------------------
-[debug] [2018-06-05T07:41:56.112Z] Command:       /usr/local/bin/node /usr/local/bin/firebase serve --only functions
-[debug] [2018-06-05T07:41:56.112Z] CLI Version:   3.18.5
-[debug] [2018-06-05T07:41:56.112Z] Platform:      darwin
-[debug] [2018-06-05T07:41:56.112Z] Node Version:  v8.9.4
-[debug] [2018-06-05T07:41:56.113Z] Time:          Tue Jun 05 2018 16:41:56 GMT+0900 (KST)
-[debug] [2018-06-05T07:41:56.113Z] ----------------------------------------------------------------------
+[debug] [2018-06-05T07:55:12.114Z] ----------------------------------------------------------------------
+[debug] [2018-06-05T07:55:12.116Z] Command:       /usr/local/bin/node /usr/local/bin/firebase serve --only functions
+[debug] [2018-06-05T07:55:12.116Z] CLI Version:   3.18.5
+[debug] [2018-06-05T07:55:12.116Z] Platform:      darwin
+[debug] [2018-06-05T07:55:12.116Z] Node Version:  v8.9.4
+[debug] [2018-06-05T07:55:12.116Z] Time:          Tue Jun 05 2018 16:55:12 GMT+0900 (KST)
+[debug] [2018-06-05T07:55:12.116Z] ----------------------------------------------------------------------
 [debug] 
-[debug] [2018-06-05T07:41:56.129Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2018-06-05T07:41:56.129Z] > authorizing via signed-in user
-[debug] [2018-06-05T07:41:56.130Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/gwnuplusfriend  
+[debug] [2018-06-05T07:55:12.125Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2018-06-05T07:55:12.125Z] > authorizing via signed-in user
+[debug] [2018-06-05T07:55:12.127Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/gwnuplusfriend  
   
- Tue Jun 05 2018 16:41:56 GMT+0900 (KST)
-[debug] [2018-06-05T07:41:57.057Z] <<< HTTP RESPONSE 200
-[debug] [2018-06-05T07:41:57.057Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/gwnuplusfriend/tokens  
+ Tue Jun 05 2018 16:55:12 GMT+0900 (KST)
+[debug] [2018-06-05T07:55:13.034Z] <<< HTTP RESPONSE 200
+[debug] [2018-06-05T07:55:13.034Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/gwnuplusfriend/tokens  
   
- Tue Jun 05 2018 16:41:57 GMT+0900 (KST)
-[debug] [2018-06-05T07:41:57.695Z] <<< HTTP RESPONSE 200
-[debug] [2018-06-05T07:41:57.696Z] >>> HTTP REQUEST GET https://cloudresourcemanager.googleapis.com/v1/projects/gwnuplusfriend  
+ Tue Jun 05 2018 16:55:13 GMT+0900 (KST)
+[debug] [2018-06-05T07:55:13.655Z] <<< HTTP RESPONSE 200
+[debug] [2018-06-05T07:55:13.656Z] >>> HTTP REQUEST GET https://cloudresourcemanager.googleapis.com/v1/projects/gwnuplusfriend  
   
- Tue Jun 05 2018 16:41:57 GMT+0900 (KST)
-[debug] [2018-06-05T07:41:58.583Z] <<< HTTP RESPONSE 200
+ Tue Jun 05 2018 16:55:13 GMT+0900 (KST)
+[debug] [2018-06-05T07:55:14.540Z] <<< HTTP RESPONSE 200
 [info] 
 [info] === Serving from '/Users/iseungjun/Development/PlusFriend'...
 [info] 
 [info] i  functions: Preparing to emulate functions.
-[debug] [2018-06-05T07:41:59.287Z] Fetching environment
-[debug] [2018-06-05T07:41:59.288Z] >>> HTTP REQUEST GET https://mobilesdk-pa.googleapis.com/v1/projects/419254284319:getServerAppConfig  
+[debug] [2018-06-05T07:55:15.267Z] Fetching environment
+[debug] [2018-06-05T07:55:15.268Z] >>> HTTP REQUEST GET https://mobilesdk-pa.googleapis.com/v1/projects/419254284319:getServerAppConfig  
   
- Tue Jun 05 2018 16:41:59 GMT+0900 (KST)
-[debug] [2018-06-05T07:42:00.043Z] <<< HTTP RESPONSE 200
-[debug] [2018-06-05T07:42:00.043Z] Starting @google-cloud/functions-emulator
-[debug] [2018-06-05T07:42:01.601Z] Parsing function triggers
+ Tue Jun 05 2018 16:55:15 GMT+0900 (KST)
+[debug] [2018-06-05T07:55:16.024Z] <<< HTTP RESPONSE 200
+[debug] [2018-06-05T07:55:16.025Z] Starting @google-cloud/functions-emulator
+[debug] [2018-06-05T07:55:17.575Z] Parsing function triggers
 [info] ✔  functions: staging: http://localhost:5000/gwnuplusfriend/us-central1/staging

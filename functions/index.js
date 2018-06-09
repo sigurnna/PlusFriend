@@ -147,12 +147,12 @@ function processCampusSelection(req, res) {
         let todayMenu = null;
 
         for (menu in campusMenu.wonju) {
-            if (menu.date == getCurrentDateString()) {
+            if (menu.date === getCurrentDateString()) {
                 todayMenu = menu;
             }
         }
 
-        let resMsg = (todayMenu != null) ? todayMenu : "오늘은 식단이 없네요!!";
+        let resMsg = (todayMenu !== null) ? todayMenu : "오늘은 식단이 없네요!!";
 
         res.json({
             message: {

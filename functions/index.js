@@ -1,19 +1,29 @@
 // Import Module
 const functions = require('firebase-functions');
-const http = require('http');
-const cheerio = require('cheerio');
-const admin = require('firebase-admin');
+const menuDispatcher = require('./menu_dispatcher/menu_dispatcher');
 
 // First Appear Menu
 const wonjuCampus = "오늘의 중식 메뉴(원주)";
 const gangreungCampus = "오늘의 중식 메뉴(강릉)";
 
+// Second Appear Menu
 const gangreungMenu = ['제 1 학생식당 중식백반', '제 2 학생식당 일품요리', '문화관식당'];
 
 // 각 캠퍼스별 메뉴를 메모리에 저장함.
 const campusMenu = {
-    wonju: [],
-    gangreung: []
+    wonju: null,
+    gangreung: null
+};
+
+// 카카오톡 플러스친구 서버에게 리턴해야 하는 response format
+const resMessage = {
+    message: {
+        text: null,
+    },
+    keyboard: {
+        type: "buttons",
+        buttons: [wonjuCampus, gangreungCampus]
+    }
 };
 
 fetchCampusMenu();
@@ -53,8 +63,10 @@ exports.message = functions.https.onRequest((req, res) => {
 function fetchCampusMenu() {
     console.log("fetching campus menus...");
 
-    fetchWonjuCampusMenu((result) => {
+    menuDispatcher.fetchWonjuMenu((menu, result) => {
         if (result) {
+            campusMenu.wonju = menu;
+
             const today = new Date();
             const triggerDate = new Date();
 
@@ -66,77 +78,6 @@ function fetchCampusMenu() {
             console.error("fetching wonju campus menu failed");
         }
     });
-}
-
-function fetchWonjuCampusMenu(onComplete) {
-    http.get("http://www.gwnu.ac.kr/kor/251/subview.do", (res) => {
-        console.log("Send request to wonju campus");
-
-        if (res.statusCode !== 200) { 
-            console.log("Receive unexpected status code from wonju campus");
-            onComplete(false);
-        }
-
-        let rawData = '';
-
-        res.setEncoding('utf8');
-        res.on('data', (chunk) => { 
-            rawData += chunk; 
-        });
-
-        res.on('end', () => {
-            console.log("Receive all response from wonju campus");
-
-            campusMenu.wonju = parseWonjuMenu(rawData);
-
-            onComplete(true);
-        });
-
-        res.on('error', (e) => {
-            console.log("Receive error from wonju campus");
-            onComplete(false);
-        });
-    });
-}
-
-// Web parsing
-
-function parseWonjuMenu(rawHTML) {
-    const $ = cheerio.load(rawHTML);
-    const menus = [];
-
-    $('._fnTable tbody tr').each(function(i, elem) {
-        // 메뉴가 없는 날은 <td>가 3개밖에 없음.
-        if ($(this).find('td').length === 5) {
-            const item = {
-                date: undefined,
-                menu_names: []
-            };
-
-            $(this).find('td').each(function(i, elem) {
-                const rawVal = $(elem).text();
-
-                switch(i) {
-                    case 0: // 날짜
-                        item.date = rawVal.split(' ')[0].trim();
-                        break;
-                    case 3: // 메뉴명
-                        rawVal.split('\n\n').forEach((elem) => {
-                            item.menu_names.push(elem);
-                        });
-                        break;
-                }
-            });
-
-            menus.push(item);
-        }
-    });
-
-    return menus;
-}
-
-function parseGangreungMenu() {
-    
 }
 
 // Menu Selection
@@ -155,39 +96,17 @@ function processCampusSelection(req, res) {
             }
         }
 
-        let resMsg = (todayMenu !== null) ? todayMenu : "오늘은 식단이 없네요!!";
+        resMessage.message.text = (todayMenu !== null) ? todayMenu : "오늘은 식단이 없네요!!";
 
-        res.json({
-            "message": {
-                "text": resMsg
-            },
-            "keyboard": {
-                "type": "buttons",
-                "buttons": [wonjuCampus, gangreungCampus]
-            }
-        });
+        res.json(JSON.stringify(resMessage));
     } else if (campus === gangreungCampus) {
-        console.log("User select gareung campus");
+        console.log("User select gangreung campus");
         // TODO: 강릉은 메뉴를 다시 선택해야 함. buttons를 리턴하자.
-        res.json({
-            "message": {
-                "text": "현재 개발중입니다"
-            },
-            "keyboard": {
-                "type": "buttons",
-                "buttons": [wonjuCampus, gangreungCampus]
-            }
-        })
+        resMessage.message.text = "현재 개발중입니다!!";
+        res.json(JSON.stringify(resMessage));
     } else {
-        res.json({
-            "message": {
-                "text": "잘못된 응답입니다."
-            },
-            "keyboard": {
-                "type": "buttons",
-                "buttons": [wonjuCampus, gangreungCampus]
-            }
-        })
+        resMessage.message.text = "잘못된 요청이 전달되었습니다.";
+        res.json(JSON.stringify(resMessage));
     }
 }
 

@@ -56,7 +56,10 @@ function fetchCampusMenu() {
     fetchWonjuCampusMenu((result) => {
         if (result) {
             const today = new Date();
-            const triggerDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1, 0, 0, 0);
+            const triggerDate = new Date();
+
+            triggerDate.setDate(today.getDate() + 1);
+            triggerDate.setHours(0, 0, 0, 0);
         
             setTimeout(fetchCampusMenu, triggerDate - today);
         } else {

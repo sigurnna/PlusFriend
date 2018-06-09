@@ -155,16 +155,36 @@ function processCampusSelection(req, res) {
         let resMsg = (todayMenu !== null) ? todayMenu : "오늘은 식단이 없네요!!";
 
         res.json({
-            message: {
-                text: resMsg
+            "message": {
+                "text": resMsg
+            },
+            "keyboard": {
+                "type": "buttons",
+                "buttons": [wonjuCampus, gangreungCampus]
             }
         });
     } else if (campus === gangreungCampus) {
         console.log("User select gareung campus");
         // TODO: 강릉은 메뉴를 다시 선택해야 함. buttons를 리턴하자.
-        res.status(400);
+        res.json({
+            "message": {
+                "text": "현재 개발중입니다"
+            },
+            "keyboard": {
+                "type": "buttons",
+                "buttons": [wonjuCampus, gangreungCampus]
+            }
+        })
     } else {
-        res.status(400);
+        res.json({
+            "message": {
+                "text": "잘못된 응답입니다."
+            },
+            "keyboard": {
+                "type": "buttons",
+                "buttons": [wonjuCampus, gangreungCampus]
+            }
+        })
     }
 }
 

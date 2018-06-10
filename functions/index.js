@@ -85,28 +85,30 @@ function fetchCampusMenu() {
 function processCampusSelection(req, res) {
     const campus = req.body['content'];
 
+    res.append("Content-Type", "application/json; charset=utf-8");
+
     if (campus === wonjuCampus) {
         console.log("User select wonju campus");
 
         let todayMenu = null;
 
-        for (menu in campusMenu.wonju) {
-            if (menu.date === getCurrentDateString()) {
+        campusMenu.wonju.forEach((elem) => {
+            if (elem.date === getCurrentDateString()) {
                 todayMenu = menu;
             }
-        }
+        });
 
         resMessage.message.text = (todayMenu !== null) ? todayMenu : "오늘은 식단이 없네요!!";
 
-        res.json(JSON.stringify(resMessage));
+        res.json(resMessage);
     } else if (campus === gangreungCampus) {
         console.log("User select gangreung campus");
         // TODO: 강릉은 메뉴를 다시 선택해야 함. buttons를 리턴하자.
         resMessage.message.text = "현재 개발중입니다!!";
-        res.json(JSON.stringify(resMessage));
+        res.json(resMessage);
     } else {
         resMessage.message.text = "잘못된 요청이 전달되었습니다.";
-        res.json(JSON.stringify(resMessage));
+        res.json(resMessage);
     }
 }
 

@@ -19,7 +19,6 @@ exports.fetchWonjuMenu = function(listener) {
 
         res.on('end', () => {
             console.log("Receive all response from wonju campus");
-
             listener(parseWonjuMenu(rawData), true);
         });
 
@@ -29,6 +28,10 @@ exports.fetchWonjuMenu = function(listener) {
         });
     });
 };
+
+exports.fetchWonjuPriceTable = function() {
+
+}
 
 exports.fetchGangreungMenu = function() {
     http.get("http://www.gwnu.ac.kr/kor/250/subview.do", (res) => {
@@ -55,7 +58,8 @@ function parseWonjuMenu(rawHTML) {
 
                 switch(i) {
                     case 0: // 날짜
-                        item.date = rawVal.split(' ')[0].trim();
+                        const date = rawVal.split(' ')[0].trim();
+                        item.date = date.replace(/\./gi, "");
                         break;
                     case 3: // 메뉴명
                         rawVal.split('\n\n').forEach((elem) => {

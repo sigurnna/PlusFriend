@@ -1,6 +1,9 @@
 // Import Module
 const functions = require('firebase-functions');
 const menuDispatcher = require('./menu_dispatcher/menu_dispatcher');
+const admin = require("firebase-admin")
+
+const serviceAccount = require("./service-account-key.json")
 
 // First Appear Menu
 const wonjuCampus = "오늘의 중식 메뉴(원주)";
@@ -8,12 +11,6 @@ const gangreungCampus = "오늘의 중식 메뉴(강릉)";
 
 // Second Appear Menu
 const gangreungMenu = ['중식백반', '일품요리', '문화관식당'];
-
-// 각 캠퍼스별 메뉴를 메모리에 저장함.
-const campusMenu = {
-    wonju: null,
-    gangreung: null
-};
 
 // 카카오톡 플러스친구 서버에게 리턴해야 하는 response format
 const resMessage = {
@@ -25,6 +22,12 @@ const resMessage = {
         buttons: [wonjuCampus, gangreungCampus]
     }
 };
+
+// Init firebase admin
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://gwnuplusfriend.firebaseio.com"
+});
 
 fetchCampusMenu();
 
@@ -63,9 +66,15 @@ exports.message = functions.https.onRequest((req, res) => {
 function fetchCampusMenu() {
     console.log("fetching campus menus...");
 
-    menuDispatcher.fetchWonjuMenu((menu, result) => {
+    menuDispatcher.fetchWonjuMenu((menuArray, result) => {
         if (result) {
-            campusMenu.wonju = menu;
+            const ref = admin.database().ref("menu/wonju");
+            
+            menuArray.forEach((menu) => {
+                ref.child(menu.date).set(menu.menu_names);
+            });
+
+            console.log("Save wonju menu to firebase realtime database complete");
 
             const today = new Date();
             const triggerDate = new Date();
@@ -90,27 +99,22 @@ function processCampusSelection(req, res) {
     if (campus === wonjuCampus) {
         console.log("User select wonju campus");
 
-        let todayMenu = null;
+        admin.database().ref("menu/wonju/").child(getCurrentDateString()).on("value", function(snapshot) {
+            const menuNameArr = snapshot.val();
+            if (menuNameArr !== null) {
+                let menuString = "";
+                menuNameArr.forEach((name) => {
+                    menuString += name;
+                    menuString += "\n";
+                });
 
-        campusMenu.wonju.forEach((elem) => {
-            if (elem.date === getCurrentDateString()) {
-                todayMenu = elem;
+                resMessage.message.text = menuString;
+            } else {
+                resMessage.message.text = "오늘은 식단이 없네요!!";
             }
+
+            res.json(resMessage);
         });
-
-        if (todayMenu === null) {
-            resMessage.message.text = "오늘은 식단이 없네요!!";
-        } else {
-            let menuString = "";
-            todayMenu.menu_names.forEach((name) => {
-                menuString += name;
-                menuString += "\n";
-            });
-
-            resMessage.message.text = menuString;
-        }
-
-        res.json(resMessage);
     } else if (campus === gangreungCampus) {
         console.log("User select gangreung campus");
         // TODO: 강릉은 메뉴를 다시 선택해야 함. buttons를 리턴하자.
@@ -130,7 +134,7 @@ function processRestaurantSelection(req, res) {
 
 function getCurrentDateString() {
     const date = new Date();
-    return date.getFullYear() + "." + (dateWithTwoDigits(date.getMonth() + 1)) + "." + dateWithTwoDigits(date.getDate());
+    return date.getFullYear() + (dateWithTwoDigits(date.getMonth() + 1)) + dateWithTwoDigits(date.getDate());
 }
 
 function dateWithTwoDigits(date) {

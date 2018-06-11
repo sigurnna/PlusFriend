@@ -7,7 +7,7 @@ const wonjuCampus = "오늘의 중식 메뉴(원주)";
 const gangreungCampus = "오늘의 중식 메뉴(강릉)";
 
 // Second Appear Menu
-const gangreungMenu = ['제 1 학생식당 중식백반', '제 2 학생식당 일품요리', '문화관식당'];
+const gangreungMenu = ['중식백반', '일품요리', '문화관식당'];
 
 // 각 캠퍼스별 메뉴를 메모리에 저장함.
 const campusMenu = {
@@ -94,11 +94,21 @@ function processCampusSelection(req, res) {
 
         campusMenu.wonju.forEach((elem) => {
             if (elem.date === getCurrentDateString()) {
-                todayMenu = menu;
+                todayMenu = elem;
             }
         });
 
-        resMessage.message.text = (todayMenu !== null) ? todayMenu : "오늘은 식단이 없네요!!";
+        if (todayMenu === null) {
+            resMessage.message.text = "오늘은 식단이 없네요!!";
+        } else {
+            let menuString = "";
+            todayMenu.menu_names.forEach((name) => {
+                menuString += name;
+                menuString += "\n";
+            });
+
+            resMessage.message.text = menuString;
+        }
 
         res.json(resMessage);
     } else if (campus === gangreungCampus) {
@@ -112,11 +122,17 @@ function processCampusSelection(req, res) {
     }
 }
 
-function processMenuSelection(req, res) {
+function processRestaurantSelection(req, res) {
+    const restaurant = req.body["body"];
 
+    
 }
 
 function getCurrentDateString() {
     const date = new Date();
-    return date.getFullYear() + "." + (date.getMonth() + 1) + "." + date.getDate();
+    return date.getFullYear() + "." + (dateWithTwoDigits(date.getMonth() + 1)) + "." + dateWithTwoDigits(date.getDate());
+}
+
+function dateWithTwoDigits(date) {
+    return ("0" + date).slice(-2);
 }

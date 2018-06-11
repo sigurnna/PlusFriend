@@ -31,7 +31,7 @@ exports.fetchWonjuMenu = function(listener) {
 
 exports.fetchWonjuPriceTable = function() {
 
-}
+};
 
 exports.fetchGangreungMenu = function() {
     http.get("http://www.gwnu.ac.kr/kor/250/subview.do", (res) => {

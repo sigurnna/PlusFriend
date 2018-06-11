@@ -99,7 +99,7 @@ function processCampusSelection(req, res) {
     if (campus === wonjuCampus) {
         console.log("User select wonju campus");
 
-        admin.database().ref("menu/wonju/").child(getCurrentDateString()).on("value", function(snapshot) {
+        admin.database().ref("menu/wonju/").child(getCurrentDateString()).once("value", (snapshot) => {
             const menuNameArr = snapshot.val();
             if (menuNameArr !== null) {
                 let menuString = "";
@@ -114,6 +114,8 @@ function processCampusSelection(req, res) {
             }
 
             res.json(resMessage);
+
+            return null;
         });
     } else if (campus === gangreungCampus) {
         console.log("User select gangreung campus");

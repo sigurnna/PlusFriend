@@ -29,15 +29,11 @@ exports.fetchWonjuMenu = function(listener) {
     });
 };
 
-exports.fetchWonjuPriceTable = function() {
-
-};
-
-exports.fetchGangreungMenu = function() {
-    http.get("http://www.gwnu.ac.kr/kor/250/subview.do", (res) => {
+// exports.fetchGangreungMenu = function() {
+//     http.get("http://www.gwnu.ac.kr/kor/250/subview.do", (res) => {
     
-    });
-};
+//     });
+// };
 
 // Internal
 
@@ -57,15 +53,17 @@ function parseWonjuMenu(rawHTML) {
                 const rawVal = $(elem).text();
 
                 switch(i) {
-                    case 0: // 날짜
+                    case 0: { // 날짜
                         const date = rawVal.split(' ')[0].trim();
                         item.date = date.replace(/\./gi, "");
                         break;
-                    case 3: // 메뉴명
+                    }
+                    case 3: {// 메뉴명
                         rawVal.split('\n\n').forEach((elem) => {
                             item.menu_names.push(elem);
                         });
                         break;
+                    }
                 }
             });
 
@@ -76,6 +74,6 @@ function parseWonjuMenu(rawHTML) {
     return menus;
 }
 
-function parseGangreungMenu(rawHTML) {
+// function parseGangreungMenu(rawHTML) {
     
-}
+// }

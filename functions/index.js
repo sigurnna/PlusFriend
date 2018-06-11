@@ -113,9 +113,9 @@ function processCampusSelection(req, res) {
                 resMessage.message.text = "오늘은 식단이 없네요!!";
             }
 
-            res.json(resMessage);
+            console.log("Send response to PlusFriend server");
 
-            return null;
+            res.json(resMessage);
         });
     } else if (campus === gangreungCampus) {
         console.log("User select gangreung campus");

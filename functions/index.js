@@ -1,4 +1,5 @@
 // Import Module
+const util = require("util");
 const functions = require('firebase-functions');
 const menuDispatcher = require('./menu_dispatcher/menu_dispatcher');
 const admin = require("firebase-admin")
@@ -70,8 +71,8 @@ function fetchCampusMenu() {
         if (result) {
             const ref = admin.database().ref("menu/wonju");
             
-            menuArray.forEach((menu) => {
-                ref.child(menu.date).set(menu.menu_names);
+            menuArray.forEach((menuItem) => {
+                ref.child(menuItem.date).set(menuItem.menus);
             });
 
             console.log("Save wonju menu to firebase realtime database complete");
@@ -101,11 +102,16 @@ function processCampusSelection(req, res) {
 
         admin.database().ref("menu/wonju/").child(getCurrentDateString()).once("value", (snapshot) => {
             const menuNameArr = snapshot.val();
+
             if (menuNameArr !== null) {
                 let menuString = "";
-                menuNameArr.forEach((name) => {
-                    menuString += name;
-                    menuString += "\n";
+
+                menuNameArr.forEach((menu) => {
+                    menuString += menu.name;
+                    menuString += (menu.price !== undefined) ? util.format("(%s)\n", menu.price) : "\n";
+
+                    console.log("menu name: " + menu.name);
+                    console.log("menu price: " + menu.price);
                 });
 
                 resMessage.message.text = menuString;

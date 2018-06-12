@@ -19,9 +19,11 @@ exports.fetchWonjuMenu = function(listener) {
 
         res.on('end', () => {
             console.log("Receive all response from wonju campus");
-            listener(parseWonjuMenu(rawData), true);
-        });
 
+            const priceArray = parseWonjuMenuPrice(rawData);
+            listener(parseWonjuMenu(priceArray, rawData), true);
+        });
+      
         res.on('error', (e) => {
             console.log("Receive error from wonju campus");
             listener(null, false);
@@ -35,18 +37,25 @@ exports.fetchWonjuMenu = function(listener) {
 //     });
 // };
 
-// Internal
+// Parsing Menu
 
-function parseWonjuMenu(rawHTML) {
+function parseWonjuMenu(priceArray, rawHTML) {
     const $ = cheerio.load(rawHTML);
-    const menus = [];
+    const resultArray = [];
 
     $('._fnTable tbody tr').each(function(i, elem) {
         // 메뉴가 없는 날은 <td>가 3개밖에 없음.
         if ($(this).find('td').length === 5) {
             const item = {
-                date: undefined,
-                menu_names: []
+                date: null,
+                menus: [
+                    /*
+                    {
+                        name: ...
+                        price: ...
+                    }
+                    */
+                ]
             };
 
             $(this).find('td').each(function(i, elem) {
@@ -58,22 +67,80 @@ function parseWonjuMenu(rawHTML) {
                         item.date = date.replace(/\./gi, "");
                         break;
                     }
-                    case 3: {// 메뉴명
+                    case 3: { // 메뉴명
                         rawVal.split('\n\n').forEach((elem) => {
-                            item.menu_names.push(elem);
+                            let findPrice = false;
+
+                            // Search for menu's price
+                            for (let key in priceArray) {
+                                if (priceArray[key].name === elem) {
+                                    findPrice = true;
+
+                                    item.menus.push({
+                                        name: elem,
+                                        price: priceArray[key].price
+                                    });
+
+                                    break;
+                                }
+                            }
+
+                            if (!findPrice) {
+                                item.menus.push({
+                                    name: elem,
+                                    price: null
+                                });
+                            }
                         });
                         break;
                     }
                 }
             });
 
-            menus.push(item);
+            resultArray.push(item);
         }
     });
 
-    return menus;
+    return resultArray;
 }
 
 // function parseGangreungMenu(rawHTML) {
     
 // }
+
+// Saving menu price
+
+function parseWonjuMenuPrice(rawHTML) {
+    const $ = cheerio.load(rawHTML);
+    const resultArray = [
+        /*
+        {
+            name: ...
+            price: ...
+        }
+        */
+    ];
+
+    $(".table_01").each((idx, elem) => {
+        if (idx > 0) { // idx 0 이면 분식당 메뉴임.
+            $(elem).find("table tbody tr").each((idx, elem) => {
+                const item = {
+                    name: null,
+                    price: null
+                };
+
+                $(elem).find("td").each((idx, elem) => {
+                    if (idx === 0) { // 메뉴명
+                        item.name = $(elem).text();
+                    } else { // 가격
+                        item.price = $(elem).text();
+                    }
+                });
+
+                resultArray.push(item);
+            });
+        }
+    });
+
+    return resultArray;
+}

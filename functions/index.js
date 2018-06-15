@@ -11,18 +11,7 @@ const wonjuCampus = "오늘의 중식 메뉴(원주)";
 const gangreungCampus = "오늘의 중식 메뉴(강릉)";
 
 // Second Appear Menu
-const gangreungMenu = ['중식백반', '일품요리', '문화관식당'];
-
-// 카카오톡 플러스친구 서버에게 리턴해야 하는 response format
-const resMessage = {
-    message: {
-        text: null,
-    },
-    keyboard: {
-        type: "buttons",
-        buttons: [wonjuCampus, gangreungCampus]
-    }
-};
+const gangreungMenu = ["중식백반", "일품요리", "문화관식당"];
 
 // Init firebase admin
 admin.initializeApp({
@@ -48,17 +37,29 @@ exports.message = functions.https.onRequest((req, res) => {
         return;
     }
 
-    req.accepts('application/json');
-    req.acceptsCharsets('utf8');
+    req.accepts("application/json");
+    req.acceptsCharsets("utf8");
 
-    const content = req.body['content'];
+    res.append("Content-Type", "application/json");
 
-    // TODO: gangreungMenu 메시지가 도착한 경우 processMenuSelection으로 라우트 되도록 하자.
-    if (content === wonjuCampus || content === gangreungCampus) {
-        processCampusSelection(req, res);
+    const content = req.body["content"];
+
+    if (content === wonjuCampus) {
+        console.log("User select wonju campus");
+
+        makeWonjuMenuJSON((resMessage) => {
+            console.log("Send response to PlusFriend server");
+
+            res.json(resMessage);
+        });
+    } else if (content === gangreungCampus) {
+        console.log("User select gangreng campus");
+
+
     } else {
         console.log('Unexpected campus name arrived: ' + content);
-        res.status(400).end();
+        
+        return res.json(makeResponseMessage("올바르지 않은 요청이 전달되었습니다."));
     }
 });
 
@@ -88,57 +89,36 @@ function fetchCampusMenu() {
             console.error("fetching wonju campus menu failed");
         }
     });
+
+    // TODO: 강릉 캠퍼스 메뉴를 가져오는 코드를 추가해야 함.
 }
 
 // Menu Selection
 
-function processCampusSelection(req, res) {
-    const campus = req.body['content'];
+function makeWonjuMenuJSON(completeListener) {
+    admin.database().ref("menu/wonju/").child(getCurrentDateString()).once("value", (snapshot) => {
+        let resMessage = makeResponseMessage(null);
 
-    res.append("Content-Type", "application/json; charset=utf-8");
+        const menuNameArr = snapshot.val();
 
-    if (campus === wonjuCampus) {
-        console.log("User select wonju campus");
+        if (menuNameArr !== null) {
+            let menuString = "";
 
-        admin.database().ref("menu/wonju/").child(getCurrentDateString()).once("value", (snapshot) => {
-            const menuNameArr = snapshot.val();
+            menuNameArr.forEach((menu) => {
+                menuString += menu.name;
+                menuString += (menu.price !== undefined) ? util.format("(%s)\n", menu.price) : "\n";
+            });
 
-            if (menuNameArr !== null) {
-                let menuString = "";
+            resMessage.message.text = menuString;
+        } else {
+            resMessage.message.text = "오늘은 식단이 없네요!!";
+        }
 
-                menuNameArr.forEach((menu) => {
-                    menuString += menu.name;
-                    menuString += (menu.price !== undefined) ? util.format("(%s)\n", menu.price) : "\n";
-
-                    console.log("menu name: " + menu.name);
-                    console.log("menu price: " + menu.price);
-                });
-
-                resMessage.message.text = menuString;
-            } else {
-                resMessage.message.text = "오늘은 식단이 없네요!!";
-            }
-
-            console.log("Send response to PlusFriend server");
-
-            res.json(resMessage);
-        });
-    } else if (campus === gangreungCampus) {
-        console.log("User select gangreung campus");
-        // TODO: 강릉은 메뉴를 다시 선택해야 함. buttons를 리턴하자.
-        resMessage.message.text = "현재 개발중입니다!!";
-        res.json(resMessage);
-    } else {
-        resMessage.message.text = "잘못된 요청이 전달되었습니다.";
-        res.json(resMessage);
-    }
+        completeListener(resMessage);
+    });
 }
 
-function processRestaurantSelection(req, res) {
-    const restaurant = req.body["body"];
-
-    
-}
+// Misc
 
 function getCurrentDateString() {
     const date = new Date();
@@ -147,4 +127,17 @@ function getCurrentDateString() {
 
 function dateWithTwoDigits(date) {
     return ("0" + date).slice(-2);
+}
+
+function makeResponseMessage(customMsg) {
+    // 카카오톡 플러스친구 서버에게 리턴해야 하는 response format
+    return resMessage = {
+        message: {
+            text: customMsg,
+        },
+        keyboard: {
+            type: "buttons",
+            buttons: [wonjuCampus, gangreungCampus]
+        }
+    };
 }

@@ -67,7 +67,7 @@ app.post("/message", (req, res) => {
         console.log("User select gangreng campus");
         return res.json(makeResponseMessage("식당을 선택해주세요.", gangreungMenu));
     } else if (gangreungMenu.includes(content)) {
-        console.log("campus: ", req.session.campus);
+        
         return res.json(makeResponseMessage("아직 개발중이에요 호호", null));
     } else {
         console.log('Unexpected campus name arrived: ' + content);
@@ -106,6 +106,17 @@ function fetchCampusMenu() {
     });
 
     // TODO: 강릉 캠퍼스 메뉴를 가져오는 코드를 추가해야 함.
+    menuDispatcher.fetchGangreungMenu((menuObj, result) => {
+        if (result) {
+            const ref = admin.database().ref("menu/gangreung");
+
+            menuObj.itemArray1.forEach((menuItem) => {
+                ref.child("store1").child(menuItem.date).set(menuItem.menus);
+            });
+
+            // TODO: itemArray2, 3도 추가해야 함.
+        }
+    });
 }
 
 // Make response json

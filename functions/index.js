@@ -1,4 +1,6 @@
 // Import Module
+const express = require("express");
+const session = require("express-session");
 const util = require("util");
 const functions = require('firebase-functions');
 const menuDispatcher = require('./menu_dispatcher/menu_dispatcher');
@@ -6,12 +8,21 @@ const admin = require("firebase-admin")
 
 const serviceAccount = require("./service-account-key.json")
 
+const app = express();
+
 // First Appear Menu
 const wonjuCampus = "오늘의 중식 메뉴(원주)";
 const gangreungCampus = "오늘의 중식 메뉴(강릉)";
 
 // Second Appear Menu
 const gangreungMenu = ["중식백반", "일품요리", "문화관식당"];
+
+// Config session
+app.use(session({
+    secret: "sigurnna",
+    resave: false,
+    saveUninitialized: true
+}));
 
 // Init firebase admin
 admin.initializeApp({
@@ -22,7 +33,7 @@ admin.initializeApp({
 fetchCampusMenu();
 
 // Kakao Plus Friend Initial Endpoint.
-exports.keyboard = functions.https.onRequest((req, res) => {
+app.get("/keyboard", (req, res) => {
     res.append('Content-type', 'application/json; charset=utf-8');
     res.json({
         'type': 'buttons',
@@ -31,8 +42,8 @@ exports.keyboard = functions.https.onRequest((req, res) => {
 });
 
 // 사용자가 플러스친구 채팅에 입력한 내용이 항상 여기로 도착함.
-exports.message = functions.https.onRequest((req, res) => {
-    if (req.method !== 'POST') { 
+app.post("/message", (req, res) => {
+    if (req.method !== 'POST') {
         res.status(400);
         return;
     }
@@ -54,14 +65,18 @@ exports.message = functions.https.onRequest((req, res) => {
         });
     } else if (content === gangreungCampus) {
         console.log("User select gangreng campus");
-
-
+        return res.json(makeResponseMessage("식당을 선택해주세요.", gangreungMenu));
+    } else if (gangreungMenu.includes(content)) {
+        console.log("campus: ", req.session.campus);
+        return res.json(makeResponseMessage("아직 개발중이에요 호호", null));
     } else {
         console.log('Unexpected campus name arrived: ' + content);
         
-        return res.json(makeResponseMessage("올바르지 않은 요청이 전달되었습니다."));
+        return res.json(makeResponseMessage("올바르지 않은 요청이 전달되었습니다.", null));
     }
 });
+
+exports.plusfriend = functions.https.onRequest(app);
 
 // Timer for fetching campus menu
 
@@ -93,11 +108,11 @@ function fetchCampusMenu() {
     // TODO: 강릉 캠퍼스 메뉴를 가져오는 코드를 추가해야 함.
 }
 
-// Menu Selection
+// Make response json
 
 function makeWonjuMenuJSON(completeListener) {
     admin.database().ref("menu/wonju/").child(getCurrentDateString()).once("value", (snapshot) => {
-        let resMessage = makeResponseMessage(null);
+        let resMessage = makeResponseMessage(null, null);
 
         const menuNameArr = snapshot.val();
 
@@ -129,7 +144,7 @@ function dateWithTwoDigits(date) {
     return ("0" + date).slice(-2);
 }
 
-function makeResponseMessage(customMsg) {
+function makeResponseMessage(customMsg, buttons) {
     // 카카오톡 플러스친구 서버에게 리턴해야 하는 response format
     return resMessage = {
         message: {
@@ -137,7 +152,7 @@ function makeResponseMessage(customMsg) {
         },
         keyboard: {
             type: "buttons",
-            buttons: [wonjuCampus, gangreungCampus]
+            buttons: buttons == null ? [wonjuCampus, gangreungCampus] : buttons
         }
     };
 }

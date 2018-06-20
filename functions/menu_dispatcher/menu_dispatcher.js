@@ -135,24 +135,46 @@ function parseGangreungMenu(rawHTML) {
     };
 
     $('._fnTable').each((idx, elem) => {
-        if (idex === 0) { // 중식백반
-            const item = {
-                date: null,
-                menus: []
-            };
+        if (idx === 0) { // 중식백반
+            let item = {};
 
             $(elem).find("tbody tr").each((idx, elem) => {
-                if ((idx+1) % 2 == 0) {
-                    const date = $(elem).find("td").get(0).text().split(" ")[0];
-                    item.date = date.replace(/\./, "");
+                if (idx % 2 == 0) {
+                    item.date = $(elem).children().first().text().split(" ")[0].replace(/\./g, "");                     
                 } else {
-                    item.menus = $(elem).find("td").get(2).text().split("<br/>");
+                    const menuNames = $(elem).children().eq(2).text().split("\n");
 
-                    resultObj.itemArray1.push(item);
+                    if (menuNames.length > 1) {
+                        item.menus = menuNames;
+                        resultObj.itemArray1.push(item);
+                    }
 
                     // Clear item
-                    item.date = null;
-                    item.menus = [];
+                    item = {};
+                }
+            });
+        } else if (idx === 1) { // 일품요리
+            $(elem).find("tbody tr").each((idx, elem) => {
+                const item = {};
+                const menuNames = $(elem).children().eq(3).text().split("\n");
+
+                if (menuNames.length > 1) {
+                    item.date = $(elem).children().first().text().split(" ")[0].replace(/\./g, "");
+                    item.menus = menuNames;
+
+                    resultObj.itemArray2.push(item);
+                }
+            });
+        } else if (idx === 2) { // 문화관 식당
+            $(elem).find("tbody tr").each((idx, elem) => {
+                const item = {};
+                const menuNames = $(elem).children().eq(3).text().split("\n");
+                
+                if (menuNames.length > 1) {
+                    item.date = $(elem).children().first().text().split(" ")[0].replace(/\./g, "");
+                    item.menus = menuNames;
+
+                    resultObj.itemArray3.push(item);
                 }
             });
         }

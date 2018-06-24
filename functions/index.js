@@ -160,7 +160,7 @@ function makeStringMenuNames(menuArray) {
     if (menuArray !== null) {
         let menuNameString = "";
 
-        menuArray.forEach((menuName) => {
+        menuArray.forEach((menu) => {
             menuNameString += menu.name;
             menuNameString += (menu.price !== undefined) ? util.format("(%s)\n", menu.price) : "\n";
         });
@@ -190,7 +190,7 @@ function makeResponseMessage(customMsg, buttons) {
         },
         keyboard: {
             type: "buttons",
-            buttons: buttons == null ? [wonjuCampus, gangreungCampus] : buttons
+            buttons: buttons === null ? [wonjuCampus, gangreungCampus] : buttons
         }
     };
 }

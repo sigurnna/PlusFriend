@@ -139,7 +139,7 @@ function parseGangreungMenu(rawHTML) {
             let item = {};
 
             $(elem).find("tbody tr").each((idx, elem) => {
-                if (idx % 2 == 0) {
+                if (idx % 2 === 0) {
                     item.date = $(elem).children().first().text().split(" ")[0].replace(/\./g, "");                     
                 } else {
                     const menuNames = $(elem).children().eq(2).text().split("\n");

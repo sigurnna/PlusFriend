@@ -67,8 +67,13 @@ app.post("/message", (req, res) => {
         console.log("User select gangreng campus");
         return res.json(makeResponseMessage("식당을 선택해주세요.", gangreungMenu));
     } else if (gangreungMenu.includes(content)) {
-        
-        return res.json(makeResponseMessage("아직 개발중이에요 호호", null));
+        console.log("User select gangreung menu");
+
+        makeGangreungMenuJSON(content, (resMessage) => {
+            console.log("Send response to PlusFriend server");
+
+            res.json(resMessage);
+        });
     } else {
         console.log('Unexpected campus name arrived: ' + content);
         
@@ -92,31 +97,41 @@ function fetchCampusMenu() {
             });
 
             console.log("Save wonju menu to firebase realtime database complete");
-
-            const today = new Date();
-            const triggerDate = new Date();
-
-            triggerDate.setDate(today.getDate() + 1);
-            triggerDate.setHours(0, 0, 0, 0);
-        
-            setTimeout(fetchCampusMenu, triggerDate - today);
         } else {
             console.error("fetching wonju campus menu failed");
         }
     });
 
-    // TODO: 강릉 캠퍼스 메뉴를 가져오는 코드를 추가해야 함.
     menuDispatcher.fetchGangreungMenu((menuObj, result) => {
         if (result) {
             const ref = admin.database().ref("menu/gangreung");
 
             menuObj.itemArray1.forEach((menuItem) => {
-                ref.child("store1").child(menuItem.date).set(menuItem.menus);
+                ref.child("중식백반").child(menuItem.date).set(menuItem.menus);
             });
 
-            // TODO: itemArray2, 3도 추가해야 함.
+            menuObj.itemArray2.forEach((menuItem)=> {
+               ref.child("일품요리").child(menuItem.date).set(menuItem.menus); 
+            });
+
+            menuObj.itemArray3.forEach((menuItem) => {
+                ref.child("문화관식당").child(menuItem.date).set(menuItem.menus);
+            });
+
+            console.log("Save gangreung menu to firebase realtime database complete");
+        } else {
+            console.error("fetching gangreung campus menu failed");
         }
     });
+
+    // TODO: 하루마다 식단을 불러오는 것이 아니라 1주일 단위로 불러와야 함.
+    const today = new Date();
+    const triggerDate = new Date();
+
+    triggerDate.setDate(today.getDate() + 1);
+    triggerDate.setHours(0, 0, 0, 0);
+
+    setTimeout(fetchCampusMenu, triggerDate - today);
 }
 
 // Make response json
@@ -125,23 +140,35 @@ function makeWonjuMenuJSON(completeListener) {
     admin.database().ref("menu/wonju/").child(getCurrentDateString()).once("value", (snapshot) => {
         let resMessage = makeResponseMessage(null, null);
 
-        const menuNameArr = snapshot.val();
-
-        if (menuNameArr !== null) {
-            let menuString = "";
-
-            menuNameArr.forEach((menu) => {
-                menuString += menu.name;
-                menuString += (menu.price !== undefined) ? util.format("(%s)\n", menu.price) : "\n";
-            });
-
-            resMessage.message.text = menuString;
-        } else {
-            resMessage.message.text = "오늘은 식단이 없네요!!";
-        }
+        resMessage.message.text = makeStringMenuNames(snapshot.val());
 
         completeListener(resMessage);
     });
+}
+
+function makeGangreungMenuJSON(selectedMenu, completeListener) {
+    admin.database().ref("menu/gangreung/").child(selectedMenu).child(getCurrentDateString()).once("value", (snapshot) => {
+        let resMessage = makeResponseMessage(null, null);
+
+        resMessage.message.text = makeStringMenuNames(snapshot.val());
+
+        completeListener(resMessage);
+    });
+}
+
+function makeStringMenuNames(menuArray) {
+    if (menuArray !== null) {
+        let menuNameString = "";
+
+        menuArray.forEach((menuName) => {
+            menuNameString += menu.name;
+            menuNameString += (menu.price !== undefined) ? util.format("(%s)\n", menu.price) : "\n";
+        });
+
+        return menuNameString;
+    } else {
+        return "오늘은 식단이 없네요!!";
+    }
 }
 
 // Misc

@@ -144,7 +144,9 @@ function parseGangreungMenu(rawHTML) {
                 } else {
                     const menuNames = $(elem).children().eq(2).text().split("\n");
 
-                    if (menuNames.length > 1) {
+                    menuNames.pop();
+
+                    if (menuNames.length > 0) {
                         item.menus = menuNames;
                         resultObj.itemArray1.push(item);
                     }
@@ -158,7 +160,9 @@ function parseGangreungMenu(rawHTML) {
                 const item = {};
                 const menuNames = $(elem).children().eq(3).text().split("\n");
 
-                if (menuNames.length > 1) {
+                menuNames.pop();
+
+                if (menuNames.length > 0) {
                     item.date = $(elem).children().first().text().split(" ")[0].replace(/\./g, "");
                     item.menus = menuNames;
 
@@ -169,8 +173,10 @@ function parseGangreungMenu(rawHTML) {
             $(elem).find("tbody tr").each((idx, elem) => {
                 const item = {};
                 const menuNames = $(elem).children().eq(3).text().split("\n");
+
+                menuNames.pop();
                 
-                if (menuNames.length > 1) {
+                if (menuNames.length > 0) {
                     item.date = $(elem).children().first().text().split(" ")[0].replace(/\./g, "");
                     item.menus = menuNames;
 

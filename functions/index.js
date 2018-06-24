@@ -18,11 +18,11 @@ const gangreungCampus = "오늘의 중식 메뉴(강릉)";
 const gangreungMenu = ["중식백반", "일품요리", "문화관식당"];
 
 // Config session
-app.use(session({
-    secret: "sigurnna",
-    resave: false,
-    saveUninitialized: true
-}));
+// app.use(session({
+//     secret: "sigurnna",
+//     resave: false,
+//     saveUninitialized: true
+// }));
 
 // Init firebase admin
 admin.initializeApp({
@@ -65,6 +65,7 @@ app.post("/message", (req, res) => {
         });
     } else if (content === gangreungCampus) {
         console.log("User select gangreng campus");
+
         return res.json(makeResponseMessage("식당을 선택해주세요.", gangreungMenu));
     } else if (gangreungMenu.includes(content)) {
         console.log("User select gangreung menu");
